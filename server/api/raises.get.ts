@@ -1,3 +1,16 @@
+const FILTERS = [
+    {
+        key: 'raise_status',
+        symbol: '=',
+        value: ['Active'],
+    },
+    {
+        key: 'crowdfunding_type_1',
+        symbol: '=',
+        value: ['RegCF', 'RegA+'],
+    }
+]
+// noinspection JSUnusedGlobalSymbols
 export default defineEventHandler(async (event) => {
     try {
         const config = useRuntimeConfig()
@@ -5,33 +18,21 @@ export default defineEventHandler(async (event) => {
         const base = config.kingsApiBase;
 
         if (!apiKey || !base) {
-            throw createError({
+            return sendError(event, createError({
                 statusCode: 500,
                 statusMessage: "Missing KingsCrowd API configuration"
-            })
+            }))
         }
 
         const query = getQuery(event);
         const page = query.page ? Number(query.page) : 1;
         const limit = query.limit ? Number(query.limit) : 25;
 
-        const filters = [
-            {
-                key: 'raise_status',
-                symbol: '=',
-                value: ['Active'],
-            },
-            {
-                key: 'crowdfunding_type_1',
-                symbol: '=',
-                value: ['RegCF', 'RegA+'],
-            }
-        ]
         const url = new URL("/api/v1/deals", base);
 
         url.searchParams.set('page', String(page));
         url.searchParams.set('limit', String(limit));
-        url.searchParams.set('filters', JSON.stringify(filters));
+        url.searchParams.set('filters', JSON.stringify(FILTERS));
         url.searchParams.set('order_by', 'start_date')
         url.searchParams.set('sort', 'desc')
 
@@ -45,19 +46,19 @@ export default defineEventHandler(async (event) => {
 
         if (!res.ok) {
             const errorText = await res.text()
-            throw createError({
+            return sendError(event, createError({
                 statusCode: res.status,
                 statusMessage: `KingsCrowd API Error: ${errorText}`,
-            })
+            }))
         }
 
         const json = await res.json()
 
         if (!json?.data?.result) {
-            throw createError({
+            return sendError(event, createError({
                 statusCode: 500,
                 statusMessage: `KingsCrowd API Error: Malformed Response`,
-            })
+            }))
         }
 
         return {
@@ -71,9 +72,9 @@ export default defineEventHandler(async (event) => {
             results: json.data.result,
         }
     } catch (err: any) {
-        throw createError({
+        return sendError(event, createError({
             statusCode: err.statusCode || 500,
             statusMessage: err.statusMessage || err.message || "Server Error"
-        })
+        }))
     }
 })
