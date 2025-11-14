@@ -9,7 +9,5 @@
 
 ******Testing******
 
-* Vitest
-* Vue Test Utils
 * Playwright
 * a11y
