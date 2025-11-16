@@ -1,6 +1,6 @@
 import {useFetch} from "nuxt/app";
-import {computed, ComputedRef, Ref, ref} from "vue";
-import {Pagination, Raise, RaisesResponse} from "../types/raises";
+import {computed, type ComputedRef, type  Ref, ref} from "vue";
+import type {Pagination, Raise, RaisesResponse} from "../types/raises";
 
 
 export interface UseRaises {
@@ -12,7 +12,9 @@ export interface UseRaises {
     error: Ref<unknown>
     nextPage: () => void
     prevPage: () => void
-    refresh: () => void
+    refresh: () => void,
+    canGoNext: ComputedRef<boolean>
+    canGoPrev: ComputedRef<boolean>
 }
 
 export function useRaises(): UseRaises {
@@ -41,11 +43,11 @@ export function useRaises(): UseRaises {
     const canGoPrev = computed(() => page.value > 1)
 
     const nextPage = () => {
-        if (canGoNext) page.value++;
+        if (canGoNext.value) page.value++;
     }
 
     const prevPage = () => {
-        if (canGoPrev) page.value--;
+        if (canGoPrev.value) page.value--;
     }
 
     return {
@@ -57,6 +59,8 @@ export function useRaises(): UseRaises {
         error,
         nextPage,
         prevPage,
-        refresh
+        refresh,
+        canGoNext,
+        canGoPrev,
     }
 }
