@@ -18,6 +18,7 @@ export function useExport() {
         const link = document.createElement('a')
         link.href = url
         document.body.appendChild(link)
+        link.download = 'raises.csv'
         link.click();
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
