@@ -30,19 +30,33 @@ const formattedRows = computed(() =>
       valuation: raise?.valuation?.formatted ?? '_',
     })))
 
-
-const isEmpty = computed(() => !props.pending && !props.error && props.rows.length === 0)
-
-const errorMessage = computed(() => {
-  if (!props.error) return ''
-  if (props.error instanceof Error) return props.error.message;
-  return "Sorry Something went wrong loading raises. Contact israelafangideh@gmail.com if this continues"
-})
-
 </script>
 <template>
-  <div v-if="props.pending" class=" flex justify-center space-x-5 py-80">
-    <div class="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-transparent"></div>
+  <div v-if="props.pending"
+       class="overflow-x-auto rounded-xl border  min-h-[100vh] border-slate-800 bg-slate-950 shadow-sm animate-pulse">
+    <div class="p-4 border-b border-slate-800">
+      <div class="h-5 w-24 bg-slate-800 rounded"></div>
+    </div>
+
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-900/60">
+      <tr>
+        <th v-for="header in columnHeaders"
+            :key="header"
+            class="px-4 py-3 text-left uppercase text-xs tracking-wide font-semibold text-slate-700">
+          <div class="h-3 w-20 bg-slate-800 rounded"></div>
+        </th>
+      </tr>
+      </thead>
+
+      <tbody class="divide-y divide-slate-800">
+      <tr v-for="n in (pagination?.count ?? 25)" :key="n">
+        <td v-for="i in columnHeaders.length" :key="i" class="px-4 py-3">
+          <div class="h-4 w-full bg-slate-800 rounded"></div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- ERROR -->
