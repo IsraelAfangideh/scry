@@ -8,10 +8,15 @@ server-side so the browser only deals with what it needs.
 ## Why It’s Built This Way
 
 Kept the implementation lightweight instead of pulling in heavy table libraries. The goal was clarity, maintainability,
-and a small surface area for the reviewer. With more time, I’d add sortable columns, richer filters, and deeper a11y
-improvements.
+and a small surface area for the reviewer.
 
-## Running Locally
+## What I would do next
+
+With more time, I’d add sortable columns, richer filters, and deeper a11y improvements.
+I would also split RaisesTable into more components to make the code more readable, and I would add tests using
+playwright and ally.
+
+## How to Run
 
 1. Clone the repo
 2. `cd scry`
@@ -28,11 +33,6 @@ improvements.
 - **CSV export** for visible rows
 - **Loading / Empty / Error** UI states
 - **Basic accessibility checks** (labels, keyboard focus, a11y tooling)
-
-## Testing
-
-- Playwright
-- a11y checks
 
 ## AI Use
 

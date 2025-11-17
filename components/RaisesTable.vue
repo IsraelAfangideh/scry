@@ -32,6 +32,17 @@ const formattedRows = computed(() =>
 
 </script>
 <template>
+  <!-- Top toolbar -->
+  <div class="flex justify-between items-center p-4 border-b bg-slate-900 border-slate-800">
+    <h2 class="text-slate-300 font-semibold">Raises</h2>
+
+    <button
+        class="px-3 py-2 text-xs font-medium rounded bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
+        @click="exportRaisesToCSV(rows, columnHeaders)"
+    >
+      Export CSV
+    </button>
+  </div>
   <div v-if="props.pending"
        class="overflow-x-auto rounded-xl border  min-h-[100vh] border-slate-800 bg-slate-950 shadow-sm animate-pulse">
     <div class="p-4 border-b border-slate-800">
@@ -60,39 +71,40 @@ const formattedRows = computed(() =>
   </div>
 
   <!-- ERROR -->
-  <div
-      v-else-if="error"
-      class="text-red-400 bg-red-900/20 border border-red-700 px-4 py-3 rounded-lg"
-  >
-    Something went wrong loading raises.
+  <div v-else-if="error" class="text-slate-400 space-y-5 bg-slate-900 min-h-[100vh] text-center py-16">
+    <div
+        class="text-red-400 bg-red-900/20 border border-red-700 px-4 py-3 rounded-lg"
+    >
+      Sorry, there was a network issue loading raises. Contact israelafangideh@gmail.com if this continues.
+
+
+    </div>
+    <div>
+      <button
+          class="px-3 py-2 text-xs font-medium rounded bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
+          @click="() => reloadNuxtApp({force: true})">
+        Refresh
+      </button>
+    </div>
+
   </div>
 
   <!-- EMPTY -->
   <div
       v-else-if="rows.length === 0"
-      class="text-slate-400 text-center py-16"
+      class="text-slate-400  flex flex-col bg-slate-900 min-h-[100vh] text-center py-16"
   >
-    No raises found.
+    No raises found
 
     <RaisesTablePagination
         :pagination="pagination"
+        class="mt-auto"
         @next-page="$emit('next-page')"
         @previous-page="$emit('previous-page')"
     />
   </div>
-  <div v-else class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 shadow-sm">
+  <div v-else class="overflow-x-auto border border-slate-800 bg-slate-950 shadow-sm">
 
-    <!-- Top toolbar -->
-    <div class="flex justify-between items-center p-4 border-b border-slate-800">
-      <h2 class="text-slate-300 font-semibold">Raises</h2>
-
-      <button
-          class="px-3 py-2 text-xs font-medium rounded bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
-          @click="exportRaisesToCSV(rows, columnHeaders)"
-      >
-        Export CSV
-      </button>
-    </div>
 
     <!-- Table -->
     <table class="min-w-full text-sm">
