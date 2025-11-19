@@ -28,17 +28,34 @@ export default defineEventHandler(async (event) => {
 
         const query = getQuery(event);
         const page = query.page ? Number(query.page) : 1;
-        const limit = query.limit ? Number(query.limit) : 25;
+        // const limit = query.limit ? Number(query.limit) : 5;
+        const limit = 5;
+        const order_by = query.order_by ? String(query.order_by) : 'start_date';
+        const sort = query.sort ? String(query.sort) : 'desc';
+
+        if (query.platform) {
+            FILTERS.push({
+                key: 'platform_id_name',
+                symbol: '=',
+                value: [String(query.platform)],
+            })
+        }
 
         const url = new URL("/api/v1/deals", base);
 
         url.searchParams.set('page', String(page));
         url.searchParams.set('limit', String(limit));
         url.searchParams.set('filters', JSON.stringify(FILTERS));
-        url.searchParams.set('order_by', 'start_date')
-        url.searchParams.set('sort', 'desc')
+        url.searchParams.set('order_by', String(order_by));
+        url.searchParams.set('sort', String(sort));
 
-        console.info("Fetching Raises", {page: query.page, limit: Number(query.limit)});
+        console.info("Fetching Raises", {
+            page: query.page,
+            limit: Number(query.limit),
+            order_by: String(order_by),
+            sort: String(sort),
+            filters: Object(FILTERS),
+        });
         const res = await fetch(url.toString(), {
             headers: {
                 Authorization: `Bearer ${apiKey}`,
@@ -58,7 +75,7 @@ export default defineEventHandler(async (event) => {
         const json = await res.json();
 
         if (!json?.data?.result) {
-            console.error("Api result was not structured as we expected")
+            console.error("Api result was not structured as we expected", json)
             return sendError(event, createError({
                 statusCode: 500,
                 statusMessage: `KingsCrowd API Error: Malformed Response`,

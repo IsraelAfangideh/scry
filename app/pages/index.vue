@@ -9,10 +9,19 @@ const {
   error,
   nextPage,
   prevPage,
+  changeSorting,
+  changePlatform,
+  refresh,
+  clearFilters,
 } = useRaises()
 </script>
 <template>
   <div class="bg-white border border-spacing-48 border-gray-200">
-    <RaisesTable :error :pagination :pending :rows @next-page="nextPage" @previous-page="prevPage"/>
+    <RaisesTable :error :pagination :pending :rows @refresh="refresh" @next-page="nextPage"
+                 @previous-page="prevPage"
+                 @sort-changed="changeSorting"
+                 @clear-filters="clearFilters"
+                 @platform-changed="changePlatform"
+    />
   </div>
 </template>

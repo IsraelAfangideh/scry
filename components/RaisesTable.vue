@@ -17,9 +17,37 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: 'next-page'): void
   (e: 'previous-page'): void
+  (e: 'clear-filters'): void
+  (e: 'refresh'): void
+  (e: 'sort-changed', val: string): void
+  (e: 'platform-changed', val: string | undefined): void
 }>()
 
-const columnHeaders = ["Name", "Status", "Platform", "Amount Raised", "Valuation"]
+const columnHeaders = ["Name", "Status", "Platform", "Amount Raised", "Minimum Investment", "Valuation", "Days Left"]
+
+const sortOptions = ['Name asc', 'Name desc', 'Status asc', 'Status desc', 'Platform asc', 'Platform desc', 'Amount Raised asc', 'Amount Raised desc', 'Valuation asc', 'Valuation desc']
+const sort = ref<string>(sortOptions[0] ?? 'Name asc')
+
+const platformOptions = ['Wefunder', 'Republic']
+const platformChoice = ref<string | undefined>(platformOptions[0] ?? undefined)
+
+const calculateDaysLeft = (startDate: string, closeDate: string): string => {
+  const start = new Date(startDate)
+  const close = new Date(closeDate)
+
+  if (isNaN(start.getTime()) || isNaN(close.getTime())) {
+    return "_"
+  }
+
+  // Normalize to avoid timezone chaos
+  const startUTC = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
+  const closeUTC = Date.UTC(close.getFullYear(), close.getMonth(), close.getDate())
+
+  const diffMs = closeUTC - startUTC
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+  return diffDays.toString()
+}
 
 const formattedRows = computed(() =>
     props.rows.map((raise) => ({
@@ -27,7 +55,9 @@ const formattedRows = computed(() =>
       status: raise.raise_status.name,
       platform: raise.platform_id.name,
       raised: raise?.funding_gather_money_raised_to_date?.formatted ?? '_',
+      minimum_investment: raise.minimum_investment_amount.formatted ?? '_',
       valuation: raise?.valuation?.formatted ?? '_',
+      daysLeft: calculateDaysLeft(raise.start_date, raise.close_date)
     })))
 
 </script>
@@ -36,6 +66,12 @@ const formattedRows = computed(() =>
   <div class="flex justify-between items-center p-4 border-b bg-slate-900 border-slate-800">
     <h2 class="text-slate-300 font-semibold">Raises</h2>
 
+    <button
+        class="px-3 py-2 text-xs font-medium rounded bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
+        @click="$emit('refresh')"
+    >
+      Refresh Table
+    </button>
     <button
         class="px-3 py-2 text-xs font-medium rounded bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
         @click="exportRaisesToCSV(rows, columnHeaders)"
@@ -96,6 +132,15 @@ const formattedRows = computed(() =>
   >
     No raises found
 
+    <div class="mt-auto">
+      <button
+          class="px-3 py-2 text-xs font-medium rounded  bg-slate-900 border border-slate-700 text-slate-200 hover:bg-slate-800 transition"
+          @click="$emit('refresh')"
+      >
+        Refresh Table
+      </button>
+    </div>
+
     <RaisesTablePagination
         :pagination="pagination"
         class="mt-auto"
@@ -104,6 +149,24 @@ const formattedRows = computed(() =>
     />
   </div>
   <div v-else class="overflow-x-auto border border-slate-800 bg-slate-950 shadow-sm">
+    <div class="flex space-x-5 justify-end">
+      <div class=" flex flex-col">
+        <label class="text-slate-50">Sort order:</label>
+        <div>
+          <select v-model="sort" @change="()=> $emit('sort-changed', sort)">
+            <option v-for="option in sortOptions" :key="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <div class="text-slate-50"> Platform Filter</div>
+        <div>
+          <select v-model="platformChoice" @change="$emit('platform-changed', platformChoice)">
+            <option v-for="option in platformOptions" :key="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
 
     <!-- Table -->
@@ -126,7 +189,9 @@ const formattedRows = computed(() =>
         <td class="px-4 py-3 text-slate-200">{{ raise.status }}</td>
         <td class="px-4 py-3 text-slate-200">{{ raise.platform }}</td>
         <td class="px-4 py-3 font-mono text-slate-200">{{ raise.raised }}</td>
+        <td class="px-4 py-3 font-mono text-slate-200">{{ raise.minimum_investment }}</td>
         <td class="px-4 py-3 font-mono text-slate-200">{{ raise.valuation }}</td>
+        <td class="px-4 py-3 font-mono text-slate-200">{{ raise.daysLeft }}</td>
       </tr>
       </tbody>
     </table>
